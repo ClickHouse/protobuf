@@ -96,13 +96,13 @@ endif()
 mark_as_advanced(CMAKE_INSTALL_CMAKEDIR)
 
 configure_file(protobuf-config.cmake.in
-  ${CMAKE_INSTALL_CMAKEDIR}/protobuf-config.cmake @ONLY)
+  ${CMAKE_CURRENT_BINARY_DIR}/protobuf-config.cmake @ONLY)
 configure_file(protobuf-config-version.cmake.in
-  ${CMAKE_INSTALL_CMAKEDIR}/protobuf-config-version.cmake @ONLY)
+  ${CMAKE_CURRENT_BINARY_DIR}/protobuf-config-version.cmake @ONLY)
 configure_file(protobuf-module.cmake.in
-  ${CMAKE_INSTALL_CMAKEDIR}/protobuf-module.cmake @ONLY)
+  ${CMAKE_CURRENT_BINARY_DIR}/protobuf-module.cmake @ONLY)
 configure_file(protobuf-options.cmake
-  ${CMAKE_INSTALL_CMAKEDIR}/protobuf-options.cmake @ONLY)
+  ${CMAKE_CURRENT_BINARY_DIR}/protobuf-options.cmake @ONLY)
 
 # Allows the build directory to be used as a find directory.
 
@@ -128,6 +128,13 @@ install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_CMAKEDIR}/
   COMPONENT protobuf-export
   PATTERN protobuf-targets.cmake EXCLUDE
 )
+
+install(FILES
+  ${CMAKE_CURRENT_BINARY_DIR}/protobuf-config.cmake
+  ${CMAKE_CURRENT_BINARY_DIR}/protobuf-config-version.cmake
+  ${CMAKE_CURRENT_BINARY_DIR}/protobuf-module.cmake
+  ${CMAKE_CURRENT_BINARY_DIR}/protobuf-options.cmake
+  DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 option(protobuf_INSTALL_EXAMPLES "Install the examples folder" OFF)
 if(protobuf_INSTALL_EXAMPLES)
