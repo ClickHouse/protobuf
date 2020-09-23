@@ -286,8 +286,6 @@ if (protobuf_BUILD_CONFORMANCE)
   include(conformance.cmake)
 endif (protobuf_BUILD_CONFORMANCE)
 
-include(install.cmake)
-
 if (protobuf_BUILD_EXAMPLES)
   include(examples.cmake)
 endif (protobuf_BUILD_EXAMPLES)
