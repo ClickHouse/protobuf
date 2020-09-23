@@ -10,6 +10,10 @@ endif()
 
 add_executable(protoc ${protoc_files} ${protoc_rc_files})
 target_link_libraries(protoc libprotoc libprotobuf)
+
+# workaround for https://github.com/ClickHouse/ClickHouse/issues/7114
+target_link_libraries(protoc pthread)
+
 add_executable(protobuf::protoc ALIAS protoc)
 
 set_target_properties(protoc PROPERTIES
