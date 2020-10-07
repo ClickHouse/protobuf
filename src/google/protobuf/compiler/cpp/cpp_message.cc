@@ -1122,7 +1122,7 @@ void MessageGenerator::GenerateClassDefinition(io::Printer* printer) {
 
   format(
       "inline $classname$() : $classname$(nullptr) {}\n"
-      "virtual ~$classname$();\n"
+      "~$classname$() override;\n"
       "\n"
       "$classname$(const $classname$& from);\n"
       "$classname$($classname$&& from) noexcept\n"
