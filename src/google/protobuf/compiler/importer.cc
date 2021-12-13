@@ -490,7 +490,7 @@ io::ZeroCopyInputStream* DiskSourceTree::OpenVirtualFile(
 
 io::ZeroCopyInputStream* DiskSourceTree::OpenDiskFile(
     const std::string& filename) {
-  struct stat sb;
+  struct stat sb = {0};
   int ret = 0;
   do {
     ret = stat(filename.c_str(), &sb);
