@@ -370,7 +370,8 @@ class FlatAllocation {
   U* End() const {
     int begin = BeginOffset<U>(), end = EndOffset<U>();
     if (begin == end) return nullptr;
-    return reinterpret_cast<U*>(data() + end);
+    // One past the end is not an object of type U, so do not cast it either.
+    return Begin<U>() + (end - begin) / sizeof(U);
   }
 
   template <typename U>
