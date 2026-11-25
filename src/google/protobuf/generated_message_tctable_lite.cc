@@ -3138,21 +3138,25 @@ PROTOBUF_NOINLINE const char* TcParser::MpMap(PROTOBUF_TC_PARAM_DECL) {
                   [](void*) {},
               });
 
-    map.VisitValue(  //
-        node,
-        absl::Overload{
-            [&](std::string* str) { Arena::CreateInArenaStorage(str, arena); },
-            [&](MessageLite* msg) {
+    // The value is not constructed yet, so a message value is passed as raw
+    // memory: casting it to `MessageLite*` before `PlacementNew` would reach
+    // an object without a vtable, which Clang CFI
+    // (`-fsanitize=cfi-unrelated-cast`) rejects.
+    map.VisitValueType([&](auto value_type) {
+      using Value = typename decltype(value_type)::type;
+      void* const value = map.GetVoidValue(node);
+      if constexpr (std::is_same_v<Value, std::string>) {
+        Arena::CreateInArenaStorage(static_cast<std::string*>(value), arena);
+      } else if constexpr (std::is_same_v<Value, MessageLite>) {
 #ifndef PROTOBUF_MESSAGE_GLOBALS
-              aux[1].table_ptr()->class_data->PlacementNew(msg, arena);
+        aux[1].table_ptr()->class_data->PlacementNew(value, arena);
 #else
-              MessageGlobalsBase::GetClassData(aux[1].message_globals())
-                  ->PlacementNew(msg, arena);
+        MessageGlobalsBase::GetClassData(aux[1].message_globals())
+            ->PlacementNew(value, arena);
 #endif
-            },
-            // Already initialized above. Do nothing here.
-            [](void*) {},
-        });
+      }
+      // Scalars are already initialized above. Do nothing here.
+    });
 
     ptr = ctx->ParseLengthDelimitedInlined(ptr, [&](const char* ptr) {
       return ParseOneMapEntry(node, ptr, ctx, aux, table, entry, map);
