@@ -500,9 +500,12 @@ class PROTOBUF_EXPORT MapFieldBase : public MapFieldBaseForParse {
     }
   }
 
-  void InitializeKeyValue(MessageLite* msg) {
+  // Takes raw memory, because the message is not constructed yet: Clang CFI
+  // (`-fsanitize=cfi-unrelated-cast`) rejects a cast to `MessageLite*` of
+  // memory without its vtable.
+  void InitializeMessageValue(void* mem) {
     GetClassData(GetMapEntryValuePrototype(*GetPrototype()))
-        ->PlacementNew(msg, arena());
+        ->PlacementNew(mem, arena());
   }
 
   // Virtual helper methods for MapIterator. MapIterator doesn't have the

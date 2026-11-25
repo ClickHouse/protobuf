@@ -63,13 +63,17 @@ void UntypedMapBase::UntypedMergeFrom(Arena* arena,
             : nullptr;
 
     for (auto it = other.begin(); !it.Equals(EndIterator()); it.PlusPlus()) {
-      Value* out = GetValue<Value>(out_node);
+      NodeBase* const node = out_node;
       out_node = out_node->next;
       auto& in = *other.GetValue<Value>(it.node_);
       if constexpr (std::is_same_v<MessageLite, Value>) {
-        class_data->PlacementNew(out, arena)->CheckTypeAndMergeFrom(in);
+        // The value is not constructed yet, so do not cast it to
+        // `MessageLite*`: Clang CFI (`-fsanitize=cfi-unrelated-cast`) rejects
+        // a cast to a polymorphic type of memory without its vtable.
+        class_data->PlacementNew(GetVoidValue(node), arena)
+            ->CheckTypeAndMergeFrom(in);
       } else {
-        Arena::CreateInArenaStorage(out, arena, in);
+        Arena::CreateInArenaStorage(GetValue<Value>(node), arena, in);
       }
     }
   });

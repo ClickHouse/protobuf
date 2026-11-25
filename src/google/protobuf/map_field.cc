@@ -90,7 +90,16 @@ bool MapFieldBase::InsertOrLookupMapValueNoSync(const MapKey& map_key,
   Arena* arena = map.arena();
 
   NodeBase* node = map.AllocNode(arena);
-  map.VisitValue(node, [&](auto* v) { InitializeKeyValue(v); });
+  map.VisitValueType([&](auto value_type) {
+    using Value = typename decltype(value_type)::type;
+    if constexpr (std::is_same_v<Value, MessageLite>) {
+      // Not constructed yet, so pass raw memory instead of a `MessageLite*`
+      // (see `InitializeMessageValue`).
+      InitializeMessageValue(map.GetVoidValue(node));
+    } else {
+      InitializeKeyValue(map.GetValue<Value>(node));
+    }
+  });
   val->SetValue(map.GetVoidValue(node));
 
   return VisitMapKey(map_key, map, [&](auto& map, const auto& key) {
